@@ -17,6 +17,7 @@ Claude Code에서 사용할 수 있는 커스텀 스킬 모음입니다.
 | [code-convention-vue3-patterns](skills/development/code-convention-vue3-patterns/) | Vue 3 패턴 컨벤션(G4-G7). 디렉티브, Router, 파일 구조, 보안 규칙 | code-convention, code-convention-vue3 |
 | [code-convention-node](skills/development/code-convention-node/) | Node.js Core 컨벤션(G1-G3). API 설계, 미들웨어, DB 핵심 규칙 | code-convention |
 | [code-convention-node-ops](skills/development/code-convention-node-ops/) | Node.js 운영 컨벤션(G4-G6). 설정 관리, 로깅, 보안 규칙 | code-convention, code-convention-node |
+| [prompt-craft](skills/development/prompt-craft/) | COSTAR+ 프레임워크 기반 프롬프트 설계. Generate/Improve/Evaluate 3모드 | - |
 
 ### Workflow
 
@@ -24,6 +25,7 @@ Claude Code에서 사용할 수 있는 커스텀 스킬 모음입니다.
 |------|------|--------|
 | [smart-commit](skills/workflow/smart-commit/) | 변경사항 분석 → 커밋 단위 분리 → 검증 → Conventional Commits 한국어 커밋 메시지 생성 | - |
 | [skill-refactor](skills/workflow/skill-refactor/) | 길어진 스킬을 분석하여 분리 전략을 제안하고 리팩토링 | - |
+| [doc-sync](skills/workflow/doc-sync/) | MD 문서와 코드베이스 불일치 감지, 수정안 제안 후 적용 | - |
 
 ## 추천 조합
 
@@ -36,6 +38,8 @@ Claude Code에서 사용할 수 있는 커스텀 스킬 모음입니다.
 | **Node.js 개발** | `code-convention` + `code-convention-node` + `code-convention-node-ops` |
 | **풀스택 (React + Node)** | `code-convention` + `code-convention-react` + `code-convention-react-patterns` + `code-convention-node` + `code-convention-node-ops` + `code-convention-security` |
 | **Git 워크플로우** | `smart-commit` |
+| **프롬프트 엔지니어링** | `prompt-craft` |
+| **문서 관리** | `doc-sync` |
 
 ## 설치 방법
 
