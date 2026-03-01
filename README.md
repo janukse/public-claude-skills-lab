@@ -26,6 +26,11 @@ Claude Code에서 사용할 수 있는 커스텀 스킬 모음입니다.
 | [smart-commit](skills/workflow/smart-commit/) | 변경사항 분석 → 커밋 단위 분리 → 검증 → Conventional Commits 한국어 커밋 메시지 생성 | - |
 | [skill-refactor](skills/workflow/skill-refactor/) | 길어진 스킬을 분석하여 분리 전략을 제안하고 리팩토링 | - |
 | [doc-sync](skills/workflow/doc-sync/) | MD 문서와 코드베이스 불일치 감지, 수정안 제안 후 적용 | - |
+| [agent-team](skills/workflow/agent-team/) | 에이전트 팀 생성 및 조율 워크플로우. 팀원 생성, 작업 분배, 모니터링, 종료까지 전체 라이프사이클 관리 | - |
+| [agent-team-setup](skills/workflow/agent-team-setup/) | 에이전트 팀 사용을 위한 환경 진단, 추천 세팅, 자동 설정 워크플로우 | agent-team |
+| [doc-review-panel](skills/workflow/doc-review-panel/) | 문서를 여러 페르소나(전문가 패널)가 각자의 관점에서 검토하고 종합 리포트 생성 | - |
+| [design-workshop](skills/workflow/design-workshop/) | 범용 설계 워크플로우. 설계 유형 자동 감지, 전문가 패널 검토, ADR/설계 명세 문서 생성 | - |
+| [task-completion-review](skills/workflow/task-completion-review/) | 작업 문서에서 항목 추출 후 코드베이스에서 실제 구현 완료 여부를 검증하여 리포트 생성 | - |
 
 ## 추천 조합
 
@@ -40,6 +45,10 @@ Claude Code에서 사용할 수 있는 커스텀 스킬 모음입니다.
 | **Git 워크플로우** | `smart-commit` |
 | **프롬프트 엔지니어링** | `prompt-craft` |
 | **문서 관리** | `doc-sync` |
+| **에이전트 팀** | `agent-team` + `agent-team-setup` |
+| **설계 워크숍** | `design-workshop` |
+| **문서 리뷰** | `doc-review-panel` |
+| **작업 검증** | `task-completion-review` |
 
 ## 설치 방법
 
