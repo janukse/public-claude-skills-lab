@@ -335,4 +335,4 @@ COSTAR(Context, Objective, Style, Tone, Audience, Response) 프레임워크에 F
 
 | File | Purpose |
 |------|---------|
-| `skills/development/prompt-craft/SKILL.md` | 이 스킬 정의 파일 |
+| `custom/development/prompt-craft/SKILL.md` | 이 스킬 정의 파일 |
