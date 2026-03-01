@@ -343,6 +343,9 @@ mkdir -p custom/<category>/<new-skill-name>
 ### 대상 스킬이 없는 경우
 지정 경로에 SKILL.md가 없으면 "지정된 경로에 SKILL.md가 없습니다."를 출력하고 종료한다.
 
+### catalog.json에 미등록된 스킬
+대상 SKILL.md가 존재하지만 catalog.json에 등록되지 않은 경우, 경고를 표시하고 분석만 수행한다 (catalog.json 업데이트는 건너뜀).
+
 ### 이미 분리된 스킬
 대상 스킬이 이미 확장 스킬 구조를 가지고 있으면 (다른 스킬이 이 스킬을 dependencies로 참조), 현재 구조를 표시하고 추가 분리가 필요한지 확인한다.
 
@@ -356,4 +359,9 @@ mkdir -p custom/<category>/<new-skill-name>
 
 | File | Purpose |
 |------|---------|
+| `catalog.json` | 스킬 메타데이터 레지스트리 |
 | `README.md` | 메인 스킬 목록 |
+| `CLAUDE.md` | 프로젝트 규칙 및 체크리스트 |
+| `templates/SKILL-workflow.md.template` | 워크플로우 스킬 템플릿 |
+| `templates/SKILL-guide-verify.md.template` | Guide/Verify 스킬 템플릿 |
+| `templates/SKILL.md.template` | 기본 스킬 템플릿 |
