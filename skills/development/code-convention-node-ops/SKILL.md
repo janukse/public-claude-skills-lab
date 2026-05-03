@@ -421,106 +421,58 @@ app.use(helmet({ contentSecurityPolicy: false })); // CSP 비활성화
 
 #### G6.5 암호학적 안전한 난수 생성 [Error]
 
-**규칙:** 세션 ID, 토큰, nonce, 비밀번호 솔트 등 보안 관련 난수는 `node:crypto` 모듈을 사용합니다. `Math.random()`은 보안 목적에 사용하지 않습니다.
+> 일반 원칙(`Math.random()` 보안 사용 금지, 암호학적 PRNG 사용)은 `code-convention-security` **G9.8**을 참조하세요. 아래는 Node.js `node:crypto` 모듈을 활용한 호출 패턴입니다.
 
-**이유:** `Math.random()`은 예측 가능한 의사 난수 생성기로, 서버에서 세션 ID나 토큰 생성에 사용하면 세션 하이재킹, 토큰 위조 등 심각한 보안 취약점이 됩니다.
+**규칙:** 세션 ID, 토큰, nonce, 비밀번호 솔트 등 보안 관련 난수는 `node:crypto` 모듈을 사용합니다.
 
 **Good:**
 ```typescript
-import { randomBytes, randomUUID, scrypt } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 
-// 세션 토큰 생성
 const sessionToken = randomBytes(32).toString('hex');
-
-// 요청 ID 생성
 const requestId = randomUUID();
-
-// 비밀번호 솔트 생성
-const salt = randomBytes(16).toString('hex');
-
-// 비밀번호 해싱
-async function hashPassword(password: string): Promise<string> {
-  const salt = randomBytes(16);
-  return new Promise((resolve, reject) => {
-    scrypt(password, salt, 64, (err, derivedKey) => {
-      if (err) reject(err);
-      resolve(`${salt.toString('hex')}:${derivedKey.toString('hex')}`);
-    });
-  });
-}
-
-// API 키 생성
 const apiKey = `sk_${randomBytes(24).toString('base64url')}`;
+const salt = randomBytes(16).toString('hex');
 ```
 
 **Bad:**
 ```typescript
-// Math.random()으로 토큰 생성 — 예측 가능!
-const sessionId = Math.random().toString(36).substring(2);
-const token = `tok_${Math.random().toString(36)}`;
-
-// Date 기반 ID — 충돌 및 예측 가능
-const requestId = `req_${Date.now()}_${Math.random()}`;
-
-// 자체 난수 시드 사용
-function generateToken(seed: number): string {
-  return ((seed * 16807) % 2147483647).toString(36); // 암호학적으로 불안전
-}
+const sessionId = Math.random().toString(36).substring(2);   // 예측 가능
+const token = `tok_${Date.now()}_${Math.random()}`;           // 충돌·예측 가능
 ```
 
 #### G6.6 민감 데이터 메모리 관리 [Warning]
 
-**규칙:** 비밀번호, 암호화 키, 토큰 등 민감 데이터를 `Buffer`로 다루고, 사용 후 즉시 `fill(0)`으로 제로화합니다. 비밀번호 비교에는 `timingSafeEqual`을 사용합니다.
+> 일반 원칙(타이밍 공격 방지, 메모리 제로화)은 `code-convention-security` **G9.6**을 참조하세요. 아래는 Node.js `node:crypto`의 `timingSafeEqual` + Buffer 패턴입니다.
 
-**이유:** 메모리에 남아 있는 민감 데이터는 메모리 덤프, 코어 덤프, 프로세스 포크를 통해 유출될 수 있습니다. 일반 문자열 비교(`===`)는 타이밍 공격에 취약합니다.
+**규칙:** 비밀번호 비교는 `timingSafeEqual`을, 민감 `Buffer`는 사용 후 `fill(0)`으로 제로화합니다.
 
 **Good:**
 ```typescript
 import { timingSafeEqual, scrypt } from 'node:crypto';
 
-// 비밀번호 검증 — timingSafeEqual + 제로화
 async function verifyPassword(input: string, stored: string): Promise<boolean> {
   const [salt, hash] = stored.split(':');
-  const saltBuffer = Buffer.from(salt, 'hex');
   const storedHash = Buffer.from(hash, 'hex');
 
   return new Promise((resolve, reject) => {
-    scrypt(input, saltBuffer, 64, (err, derivedKey) => {
-      if (err) reject(err);
+    scrypt(input, salt, 64, (err, derivedKey) => {
+      if (err) return reject(err);
       try {
         resolve(timingSafeEqual(derivedKey, storedHash));
       } finally {
-        derivedKey.fill(0); // 파생 키 제로화
-        saltBuffer.fill(0); // 솔트 제로화
+        derivedKey.fill(0);  // 파생 키 제로화
       }
     });
   });
-}
-
-// 암호화 키 사용 후 제로화
-async function encryptAndCleanup(data: Buffer, key: Buffer): Promise<Buffer> {
-  try {
-    return await encrypt(data, key);
-  } finally {
-    key.fill(0);
-  }
 }
 ```
 
 **Bad:**
 ```typescript
-// 문자열 비교 — 타이밍 공격 취약
-function verifyPassword(input: string, stored: string): boolean {
-  return input === stored; // 문자 길이에 따라 응답 시간이 다름
-}
-
-// 키가 메모리에 계속 남아 있음
-const secretKey = Buffer.from(env.ENCRYPTION_KEY, 'hex');
-const result = encrypt(data, secretKey);
-// secretKey가 제로화되지 않고 GC까지 메모리에 잔류
-
-// 에러 로그에 민감 데이터 포함
-logger.error('Auth failed', { password: input, hash: stored });
+return input === stored;                          // 타이밍 공격 취약
+const key = Buffer.from(env.KEY, 'hex');          // 사용 후 .fill(0) 누락 → GC까지 잔류
+logger.error('Auth failed', { password: input }); // 로그에 민감 정보
 ```
 
 ---
@@ -575,6 +527,8 @@ console 사용 (프로덕션 코드에서):
 
 ### Step 5: G6.5/G6.6 보안 심화 검사
 
+먼저 `code-convention-security verify`를 호출하여 G9.6/G9.8 등 일반 보안 규칙을 검증합니다. 그 후 아래 Node.js `node:crypto` 호출 패턴을 추가 검증합니다.
+
 Grep 도구를 사용하여 탐지합니다:
 
 Math.random()을 보안 목적에 사용하는 패턴:
@@ -615,11 +569,11 @@ Core 검증, Node.js Core 검증, 운영 검증 결과를 통합하여 보고서
 
 | 카테고리 | Error | Warning | Info | 상태 |
 |----------|-------|---------|------|------|
-| Core: G1-G5 | ... | ... | ... | ... |
-| Node Core: G1-G3 | ... | ... | ... | ... |
-| Node Ops: G4. 설정 관리 | 1 | 0 | 0 | ❌ |
-| Node Ops: G5. 로깅 | 0 | 1 | 0 | ⚠️ |
-| Node Ops: G6. 보안 | 0 | 1 | 0 | ⚠️ |
+| code-convention:G1-G5 | ... | ... | ... | ... |
+| code-convention-node:G1-G3 | ... | ... | ... | ... |
+| code-convention-node-ops:G4. 설정 관리 | 1 | 0 | 0 | ❌ |
+| code-convention-node-ops:G5. 로깅 | 0 | 1 | 0 | ⚠️ |
+| code-convention-node-ops:G6. 보안 | 0 | 1 | 0 | ⚠️ |
 
 ### 상세 위반 목록
 

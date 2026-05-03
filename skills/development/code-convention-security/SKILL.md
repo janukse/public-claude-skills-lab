@@ -337,7 +337,36 @@ Math.random()을 보안 목적에 사용하는 패턴:
 - Glob 필터: `*.{ts,tsx}`
 - 결과에서 test/spec/mock 파일은 면제 처리
 
-### Step 4: 보고서 생성
+### Step 4: G9.5 의존성 보안 감사
+
+`npm audit` 또는 동등한 도구로 알려진 취약점을 검사합니다.
+
+Bash 도구로 실행:
+- 명령: `npm audit --production --audit-level=high --json`
+- `package-lock.json`이 없는 프로젝트는 면제 (안내 메시지 출력)
+- yarn 프로젝트는 `yarn npm audit --severity high` 사용
+- pnpm 프로젝트는 `pnpm audit --prod --audit-level high` 사용
+
+판정 기준:
+- `high` 또는 `critical` 등급 취약점 1건 이상 → 위반
+- `moderate` 이하는 [Info]로 보고하되 차단하지 않음
+
+### Step 5: G9.6 민감 데이터 메모리 제로화 검사
+
+Grep 도구를 사용하여 비교/처리 패턴을 탐지합니다:
+
+타이밍 공격에 취약한 비밀번호/토큰 비교:
+- 패턴: `(password|token|secret|hash)\s*===|==\s*(password|token|secret|hash)`
+- Glob 필터: `*.{ts,tsx}`
+- 대소문자 무시 옵션 사용
+- 동일 파일에 `crypto.timingSafeEqual` import가 없으면 위반
+
+Buffer를 사용한 민감 정보 처리 후 zeroing 누락:
+- 패턴: `Buffer\.from.*(password|secret|key|token)`
+- Glob 필터: `*.{ts,tsx}`
+- 동일 함수 스코프에 `\.fill\(0\)` 호출이 없으면 [Warning]
+
+### Step 6: 보고서 생성
 
 Core 검증 결과와 Security 검증 결과를 통합하여 보고서를 출력합니다.
 
@@ -352,8 +381,8 @@ Core 검증 결과와 Security 검증 결과를 통합하여 보고서를 출력
 
 | 카테고리 | Error | Warning | Info | 상태 |
 |----------|-------|---------|------|------|
-| Core: G1-G5 | ... | ... | ... | ... |
-| Security: G9. 보안 | 1 | 0 | 0 | ❌ |
+| code-convention:G1-G5 | ... | ... | ... | ... |
+| code-convention-security:G9. 보안 | 1 | 0 | 0 | ❌ |
 | **합계** | **...** | **...** | **...** | — |
 
 ### 상세 위반 목록
